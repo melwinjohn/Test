@@ -15,3 +15,16 @@ CREATE INDEX IF NOT EXISTS document_chunks_embedding_idx
 ON document_chunks
 USING ivfflat (embedding vector_cosine_ops)
 WITH (lists = 100);
+
+CREATE INDEX IF NOT EXISTS document_chunks_metadata_gin_idx
+ON document_chunks
+USING gin (metadata);
+
+CREATE INDEX IF NOT EXISTS document_chunks_document_type_idx
+ON document_chunks ((metadata->>'document_type'));
+
+CREATE INDEX IF NOT EXISTS document_chunks_pii_level_idx
+ON document_chunks ((metadata->>'pii_level'));
+
+CREATE INDEX IF NOT EXISTS document_chunks_contains_pii_idx
+ON document_chunks ((metadata->>'contains_pii'));

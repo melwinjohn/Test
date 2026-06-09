@@ -10,7 +10,72 @@ from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 
 from rag_pipeline.config import Settings, get_settings
+from rag_pipeline.metadata import PiiLevel
 from rag_pipeline.models import Chunk
+
+
+class MetadataFilter:
+    """Filter chunks by metadata fields during similarity search."""
+
+    def __init__(
+        self,
+        document_type: str | None = None,
+        tenant_id: str | None = None,
+        access_tier: str | None = None,
+        exclude_pii: bool = False,
+        pii_level_max: PiiLevel | str | None = None,
+        tags: list[str] | None = None,
+        contains: dict[str, Any] | None = None,
+    ) -> None:
+        self.document_type = document_type
+        self.tenant_id = tenant_id
+        self.access_tier = access_tier
+        self.exclude_pii = exclude_pii
+        self.pii_level_max = (
+            PiiLevel(pii_level_max) if isinstance(pii_level_max, str) else pii_level_max
+        )
+        self.tags = tags or []
+        self.contains = contains or {}
+
+    def to_sql(self) -> tuple[list[str], list[Any]]:
+        clauses: list[str] = []
+        params: list[Any] = []
+
+        if self.document_type:
+            clauses.append("metadata->>'document_type' = %s")
+            params.append(self.document_type)
+
+        if self.tenant_id:
+            clauses.append("metadata->>'tenant_id' = %s")
+            params.append(self.tenant_id)
+
+        if self.access_tier:
+            clauses.append("metadata->>'access_tier' = %s")
+            params.append(self.access_tier)
+
+        if self.exclude_pii:
+            clauses.append("(metadata->>'contains_pii')::boolean IS NOT TRUE")
+
+        if self.pii_level_max is not None:
+            allowed = [level.value for level in PiiLevel if _pii_rank(level) <= _pii_rank(self.pii_level_max)]
+            clauses.append("metadata->>'pii_level' = ANY(%s)")
+            params.append(allowed)
+
+        if self.tags:
+            clauses.append("metadata->'tags' ?| %s")
+            params.append(self.tags)
+
+        for key, value in self.contains.items():
+            clauses.append("metadata @> %s::jsonb")
+            params.append(json.dumps({key: value}))
+
+        return clauses, params
+
+
+def _pii_rank(level: PiiLevel) -> int:
+    from rag_pipeline.metadata import PII_LEVEL_RANK
+
+    return PII_LEVEL_RANK[level]
 
 
 class PgVectorStore:
@@ -50,6 +115,31 @@ class PgVectorStore:
                     ON document_chunks
                     USING ivfflat (embedding vector_cosine_ops)
                     WITH (lists = 100)
+                    """
+                )
+                cur.execute(
+                    """
+                    CREATE INDEX IF NOT EXISTS document_chunks_metadata_gin_idx
+                    ON document_chunks
+                    USING gin (metadata)
+                    """
+                )
+                cur.execute(
+                    """
+                    CREATE INDEX IF NOT EXISTS document_chunks_document_type_idx
+                    ON document_chunks ((metadata->>'document_type'))
+                    """
+                )
+                cur.execute(
+                    """
+                    CREATE INDEX IF NOT EXISTS document_chunks_pii_level_idx
+                    ON document_chunks ((metadata->>'pii_level'))
+                    """
+                )
+                cur.execute(
+                    """
+                    CREATE INDEX IF NOT EXISTS document_chunks_contains_pii_idx
+                    ON document_chunks ((metadata->>'contains_pii'))
                     """
                 )
             conn.commit()
@@ -101,12 +191,22 @@ class PgVectorStore:
         query_embedding: list[float],
         top_k: int = 5,
         source_filter: str | None = None,
+        metadata_filter: MetadataFilter | None = None,
     ) -> list[dict[str, Any]]:
-        source_clause = ""
-        params: list[Any] = [query_embedding, query_embedding, top_k]
+        where_clauses = ["TRUE"]
+        params: list[Any] = [query_embedding]
+
         if source_filter:
-            source_clause = "AND source = %s"
-            params = [query_embedding, source_filter, query_embedding, top_k]
+            where_clauses.append("source = %s")
+            params.append(source_filter)
+
+        if metadata_filter:
+            metadata_clauses, metadata_params = metadata_filter.to_sql()
+            where_clauses.extend(metadata_clauses)
+            params.extend(metadata_params)
+
+        params.extend([query_embedding, top_k])
+        where_sql = " AND ".join(where_clauses)
 
         with self._connection() as conn:
             with conn.cursor() as cur:
@@ -120,7 +220,7 @@ class PgVectorStore:
                         metadata,
                         1 - (embedding <=> %s::vector) AS similarity
                     FROM document_chunks
-                    WHERE TRUE {source_clause}
+                    WHERE {where_sql}
                     ORDER BY embedding <=> %s::vector
                     LIMIT %s
                     """,

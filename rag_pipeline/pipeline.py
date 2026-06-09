@@ -6,7 +6,7 @@ from rag_pipeline.config import Settings, get_settings
 from rag_pipeline.embedder import CohereEmbedder
 from rag_pipeline.models import Chunk, Document
 from rag_pipeline.semantic_chunker import SemanticChunker
-from rag_pipeline.vector_store import PgVectorStore
+from rag_pipeline.vector_store import MetadataFilter, PgVectorStore
 
 
 @dataclass
@@ -64,12 +64,19 @@ class IngestionPipeline:
         document = Document(content=content, source=source, metadata=metadata or {})
         return self.ingest_document(document, replace=replace)
 
-    def search(self, query: str, top_k: int = 5, source_filter: str | None = None):
+    def search(
+        self,
+        query: str,
+        top_k: int = 5,
+        source_filter: str | None = None,
+        metadata_filter: MetadataFilter | None = None,
+    ):
         query_embedding = self.embedder.embed_query(query)
         return self.vector_store.similarity_search(
             query_embedding=query_embedding,
             top_k=top_k,
             source_filter=source_filter,
+            metadata_filter=metadata_filter,
         )
 
     def close(self) -> None:

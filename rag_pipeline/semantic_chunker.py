@@ -4,6 +4,7 @@ import numpy as np
 
 from rag_pipeline.config import Settings, get_settings
 from rag_pipeline.embedder import CohereEmbedder
+from rag_pipeline.metadata import build_chunk_metadata
 from rag_pipeline.models import Chunk, Document
 from rag_pipeline.text_splitter import merge_sentences, split_into_sentences
 
@@ -34,11 +35,11 @@ class SemanticChunker:
 
         if len(sentences) == 1:
             return [
-                Chunk(
+                self._make_chunk(
+                    document=document,
                     content=sentences[0],
-                    source=document.source,
                     chunk_index=0,
-                    metadata={**document.metadata, "chunking": "semantic"},
+                    chunk_count=1,
                 )
             ]
 
@@ -48,14 +49,37 @@ class SemanticChunker:
         merged = merge_sentences(groups, self.max_chars)
 
         return [
-            Chunk(
+            self._make_chunk(
+                document=document,
                 content=content,
-                source=document.source,
                 chunk_index=index,
-                metadata={**document.metadata, "chunking": "semantic"},
+                chunk_count=len(merged),
             )
             for index, content in enumerate(merged)
         ]
+
+    def _make_chunk(
+        self,
+        document: Document,
+        content: str,
+        chunk_index: int,
+        chunk_count: int,
+    ) -> Chunk:
+        metadata = build_chunk_metadata(
+            document.metadata,
+            chunk_index=chunk_index,
+            chunk_count=chunk_count,
+            content=content,
+            file_name=document.metadata.get("file_name"),
+            file_path=document.metadata.get("file_path"),
+            detect_pii=self.settings.detect_pii_in_chunks,
+        )
+        return Chunk(
+            content=content,
+            source=document.source,
+            chunk_index=chunk_index,
+            metadata=metadata,
+        )
 
     def chunk_documents(self, documents: list[Document]) -> list[Chunk]:
         chunks: list[Chunk] = []

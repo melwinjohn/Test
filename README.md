@@ -69,11 +69,72 @@ rag-ingest ingest data/sample.txt
 rag-ingest ingest data/ --pattern "*.txt"
 ```
 
-### 6. Search
+### 6. Ingest documents with metadata (invoices, contracts, PII)
+
+Use sidecar files, a manifest, or CLI flags:
 
 ```bash
-rag-ingest search "How does semantic chunking work?" --top-k 3
+# Sidecar: data/samples/invoice.txt + invoice.txt.meta.json
+rag-ingest ingest data/samples/
+
+# Manifest maps file paths to metadata
+rag-ingest ingest data/samples/ --manifest data/manifest.json
+
+# CLI flags for batch metadata
+rag-ingest ingest data/invoices/ \
+  --doc-type invoice \
+  --tenant-id acme-corp \
+  --contains-pii \
+  --pii-level high \
+  --tags billing,accounts-payable
 ```
+
+### 7. Search with metadata filters
+
+```bash
+rag-ingest search "payment terms" --doc-type contract --exclude-pii
+rag-ingest search "invoice total" --doc-type invoice --pii-level-max low
+rag-ingest search "termination clause" --access-tier legal_only
+```
+
+## Metadata model
+
+Each chunk inherits document metadata and adds chunk-level fields:
+
+| Field | Level | Purpose |
+|-------|-------|---------|
+| `document_type` | document | `invoice`, `contract`, `correspondence`, `report`, `other` |
+| `document_id` | document | Business identifier (invoice #, contract ID) |
+| `tenant_id` | document | Tenant / customer scope |
+| `contains_pii` | document | Whether the chunk is marked as containing PII |
+| `pii_level` | document | `none`, `low`, `high`, `restricted` |
+| `pii_categories` | document | e.g. `email`, `ssn`, `bank_account` |
+| `access_tier` | document | Access control hint (`legal_only`, `finance_only`) |
+| `tags` | document | Free-form labels for filtering |
+| `chunk_index` | chunk | Position within the source document |
+| `chunk_count` | chunk | Total chunks for the source |
+| `detected_pii_categories` | chunk | PII patterns found in chunk text (optional scan) |
+
+Metadata is stored as JSONB on every row in `document_chunks` and indexed for filtering.
+
+### Sidecar metadata file
+
+`invoice.txt.meta.json` next to `invoice.txt`:
+
+```json
+{
+  "document_type": "invoice",
+  "document_id": "INV-2024-0847",
+  "tenant_id": "acme-corp",
+  "contains_pii": true,
+  "pii_level": "high",
+  "pii_categories": ["email", "bank_account"],
+  "access_tier": "finance_only",
+  "tags": ["accounts-payable"]
+}
+```
+
+Set `DETECT_PII_IN_CHUNKS=true` to scan chunk text for common PII patterns (email, phone, SSN, etc.) and enrich `detected_pii_categories`.
 
 ## Programmatic usage
 
@@ -87,7 +148,13 @@ pipeline.initialize()
 document = Document(
     content="Your document text here.",
     source="my-doc",
-    metadata={"category": "notes"},
+    metadata={
+        "document_type": "contract",
+        "tenant_id": "acme-corp",
+        "contains_pii": True,
+        "pii_level": "low",
+        "access_tier": "legal_only",
+    },
 )
 result = pipeline.ingest_document(document)
 print(result)
@@ -109,6 +176,7 @@ pipeline.close()
 | `SEMANTIC_CHUNK_BREAKPOINT_PERCENTILE` | `90` | Percentile for semantic breakpoints (higher = fewer, larger chunks) |
 | `SEMANTIC_CHUNK_MAX_CHARS` | `2000` | Maximum characters per chunk |
 | `EMBED_BATCH_SIZE` | `96` | Batch size for Cohere embed API calls |
+| `DETECT_PII_IN_CHUNKS` | `true` | Scan chunk text for PII patterns |
 
 ## Project layout
 
@@ -119,7 +187,8 @@ rag_pipeline/
   semantic_chunker.py # Semantic chunking logic
   vector_store.py     # pgvector persistence and search
   pipeline.py         # End-to-end ingestion orchestration
-  loaders.py          # File/directory loaders
+  loaders.py          # File/directory loaders + manifest/sidecar metadata
+  metadata.py         # Metadata schema, PII detection, chunk enrichment
   cli.py              # CLI entry point
 scripts/init_db.sql   # Optional SQL bootstrap
 docker-compose.yml    # Local pgvector database

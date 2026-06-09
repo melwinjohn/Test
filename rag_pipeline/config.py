@@ -32,6 +32,11 @@ class Settings(BaseSettings):
         gt=0,
     )
     embed_batch_size: int = Field(default=96, alias="EMBED_BATCH_SIZE", gt=0)
+    detect_pii_in_chunks: bool = Field(
+        default=True,
+        alias="DETECT_PII_IN_CHUNKS",
+        description="Scan chunk text for PII patterns and enrich metadata",
+    )
 
     @property
     def embedding_dimensions(self) -> int:

@@ -1,0 +1,10 @@
+{
+  "document_type": "invoice",
+  "document_id": "INV-2024-0847",
+  "tenant_id": "acme-corp",
+  "contains_pii": true,
+  "pii_level": "high",
+  "pii_categories": ["email", "person_name", "address", "bank_account"],
+  "access_tier": "finance_only",
+  "tags": ["accounts-payable", "billing"]
+}

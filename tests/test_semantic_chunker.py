@@ -7,6 +7,7 @@ def _mock_settings():
     settings = MagicMock()
     settings.semantic_chunk_breakpoint_percentile = 90.0
     settings.semantic_chunk_max_chars = 2000
+    settings.detect_pii_in_chunks = False
     return settings
 
 
