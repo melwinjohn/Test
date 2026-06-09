@@ -1,0 +1,12 @@
+Retrieval-Augmented Generation (RAG) combines large language models with external knowledge sources.
+Instead of relying only on parametric memory, RAG retrieves relevant documents at query time.
+
+Semantic chunking improves retrieval quality by grouping text based on meaning rather than fixed token counts.
+Adjacent sentences with high embedding similarity stay in the same chunk.
+When similarity drops sharply, a new chunk begins.
+
+Cohere embedding models produce dense vectors suitable for semantic search.
+The embed-english-v3.0 model outputs 1024-dimensional vectors optimized for retrieval tasks.
+
+Pgvector extends PostgreSQL with vector similarity operators.
+Cosine distance is commonly used to rank nearest neighbors for RAG applications.

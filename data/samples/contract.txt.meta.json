@@ -1,0 +1,10 @@
+{
+  "document_type": "contract",
+  "document_id": "MSA-2024-0091",
+  "tenant_id": "gamma-industries",
+  "contains_pii": true,
+  "pii_level": "low",
+  "pii_categories": ["email", "person_name"],
+  "access_tier": "legal_only",
+  "tags": ["msa", "legal"]
+}

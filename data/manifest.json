@@ -1,0 +1,18 @@
+{
+  "data/samples/invoice.txt": {
+    "document_type": "invoice",
+    "document_id": "INV-2024-0847",
+    "tenant_id": "acme-corp",
+    "contains_pii": true,
+    "pii_level": "high",
+    "access_tier": "finance_only"
+  },
+  "data/samples/contract.txt": {
+    "document_type": "contract",
+    "document_id": "MSA-2024-0091",
+    "tenant_id": "gamma-industries",
+    "contains_pii": true,
+    "pii_level": "low",
+    "access_tier": "legal_only"
+  }
+}
