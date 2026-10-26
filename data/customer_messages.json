@@ -1,0 +1,33 @@
+{
+  "dataset": "Customer Support Inbox – October 2024",
+  "messages": [
+    {"id": "M01", "text": "My order #A4821 hasn't arrived yet and it's been 10 days. Please help!", "label": "shipping_delay"},
+    {"id": "M02", "text": "I was charged twice for the same item. Please refund the duplicate charge.", "label": "billing_error"},
+    {"id": "M03", "text": "How do I reset my password? The 'forgot password' link isn't working.", "label": "account_access"},
+    {"id": "M04", "text": "The laptop I bought stopped turning on after 2 weeks. This is unacceptable.", "label": "product_defect"},
+    {"id": "M05", "text": "Can you tell me what payment methods you accept?", "label": "general_inquiry"},
+    {"id": "M06", "text": "I need to cancel my subscription immediately. I've been trying for days.", "label": "cancellation"},
+    {"id": "M07", "text": "My package says delivered but it's not here. Checked with neighbours too.", "label": "shipping_delay"},
+    {"id": "M08", "text": "There's an extra $9.99 charge on my statement I don't recognise.", "label": "billing_error"},
+    {"id": "M09", "text": "I can't log in – it keeps saying invalid credentials even after I reset my password.", "label": "account_access"},
+    {"id": "M10", "text": "The screen on my phone has a dead pixel after just one month of use.", "label": "product_defect"},
+    {"id": "M11", "text": "What are your business hours for phone support?", "label": "general_inquiry"},
+    {"id": "M12", "text": "Please cancel my monthly plan and issue a pro-rata refund.", "label": "cancellation"},
+    {"id": "M13", "text": "Estimated delivery said today but tracking hasn't updated in 5 days.", "label": "shipping_delay"},
+    {"id": "M14", "text": "I was billed for an annual plan but I only signed up for monthly.", "label": "billing_error"},
+    {"id": "M15", "text": "Two-factor auth stopped sending me codes. I'm locked out of my account.", "label": "account_access"},
+    {"id": "M16", "text": "The bluetooth headphones I ordered have crackling sound. Factory defect?", "label": "product_defect"},
+    {"id": "M17", "text": "Do you offer student discounts? I'm in university.", "label": "general_inquiry"},
+    {"id": "M18", "text": "I want to downgrade my plan from Pro to Free. How do I do that?", "label": "cancellation"},
+    {"id": "M19", "text": "Express shipping option says 2 days but it's been 4. Where is my parcel?", "label": "shipping_delay"},
+    {"id": "M20", "text": "The promo code SAVE20 isn't working at checkout. Says 'invalid'.", "label": "billing_error"}
+  ],
+  "categories": {
+    "shipping_delay": "Package not delivered or delayed beyond estimated date",
+    "billing_error": "Incorrect charges, duplicate billing, or payment issues",
+    "account_access": "Login problems, password resets, 2FA issues",
+    "product_defect": "Hardware or software defects in purchased products",
+    "general_inquiry": "General questions about services, policies, or features",
+    "cancellation": "Requests to cancel subscriptions or downgrade plans"
+  }
+}

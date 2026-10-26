@@ -1,0 +1,73 @@
+{
+  "assignment": "Algebra I – Problem Set 4",
+  "grade_level": "9th grade",
+  "problems": [
+    {
+      "id": "P1",
+      "problem": "Solve for x:  2x + 5 = 13",
+      "student_answer": "x = 4",
+      "student_work": "2x + 5 = 13\n2x = 13 - 5 = 8\nx = 4",
+      "correct_answer": "x = 4",
+      "is_correct": true
+    },
+    {
+      "id": "P2",
+      "problem": "Solve for x:  3(x - 2) = 15",
+      "student_answer": "x = 7",
+      "student_work": "3x - 2 = 15\n3x = 17\nx = 17/3 ≈ 5.67",
+      "correct_answer": "x = 7",
+      "is_correct": false,
+      "error_type": "distribution error – forgot to multiply -2 by 3"
+    },
+    {
+      "id": "P3",
+      "problem": "Simplify:  4x² + 3x - 2x² + x",
+      "student_answer": "2x² + 4x",
+      "student_work": "Combine like terms:\n4x² - 2x² = 2x²\n3x + x = 4x\nResult: 2x² + 4x",
+      "correct_answer": "2x² + 4x",
+      "is_correct": true
+    },
+    {
+      "id": "P4",
+      "problem": "The sum of two consecutive integers is 47.  Find both integers.",
+      "student_answer": "23 and 24",
+      "student_work": "Let the integers be n and n+1.\nn + n+1 = 47\n2n + 1 = 47\n2n = 46\nn = 23\nIntegers: 23 and 24",
+      "correct_answer": "23 and 24",
+      "is_correct": true
+    },
+    {
+      "id": "P5",
+      "problem": "Solve the inequality:  5x - 3 > 12",
+      "student_answer": "x > 3",
+      "student_work": "5x - 3 > 12\n5x > 15\nx > 3",
+      "correct_answer": "x > 3",
+      "is_correct": true
+    },
+    {
+      "id": "P6",
+      "problem": "Factorise:  x² - 9",
+      "student_answer": "(x-3)(x-3)",
+      "student_work": "x² - 9 = (x-3)(x-3)",
+      "correct_answer": "(x+3)(x-3)",
+      "is_correct": false,
+      "error_type": "confused difference of squares – both factors have same sign"
+    },
+    {
+      "id": "P7",
+      "problem": "A rectangle has length (x+4) and width (x-1).  Write an expression for its area.",
+      "student_answer": "x² + 3x - 4",
+      "student_work": "(x+4)(x-1)\n= x·x + x·(-1) + 4·x + 4·(-1)\n= x² - x + 4x - 4\n= x² + 3x - 4",
+      "correct_answer": "x² + 3x - 4",
+      "is_correct": true
+    },
+    {
+      "id": "P8",
+      "problem": "Solve the system:  x + y = 10,  x - y = 4",
+      "student_answer": "x = 7, y = 4",
+      "student_work": "Add both equations:\n2x = 14, so x = 7\nSubstitute: 7 + y = 10, y = 3",
+      "correct_answer": "x = 7, y = 3",
+      "is_correct": false,
+      "error_type": "arithmetic error in final substitution – correct method, wrong final value for y"
+    }
+  ]
+}
